@@ -1,0 +1,36 @@
+{
+	"SubTypeTree": {
+		"company": {
+			"name": "Company",
+			"children": [{
+				"name": "Buildings",
+				"children": [{
+					"name": "Cubicles"
+				}, {
+					"name": "Rest Rooms",
+					"children": [{
+						"name": "Girls"
+					}, {
+						"name": "Boys"
+					}]
+				}, {
+					"name": "Meeting Rooms"
+				}, {
+					"name": "Indoor Cafeteria"
+				}]
+			}, {
+				"name": "Cafeteria"
+			}, {
+				"name": "Conference Rooms"
+			}]
+		}
+	},
+
+	"Types": [{
+		"key": "company",
+		"name": "Company"
+	}, {
+		"key": "org",
+		"name": "Organization"
+	}]
+}

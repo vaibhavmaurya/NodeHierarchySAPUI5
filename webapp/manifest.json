@@ -1,0 +1,108 @@
+{
+	"_version": "1.8.0",
+	"sap.app": {
+		"id": "IOT.HierarchyModule",
+		"type": "application",
+		"i18n": "i18n/i18n.properties",
+		"applicationVersion": {
+			"version": "1.0.0"
+		},
+		"title": "{{appTitle}}",
+		"description": "{{appDescription}}",
+		"sourceTemplate": {
+			"id": "ui5template.basicSAPUI5ApplicationProject",
+			"version": "1.40.12"
+		}
+	},
+
+	"sap.ui": {
+		"technology": "UI5",
+		"icons": {
+			"icon": "",
+			"favIcon": "",
+			"phone": "",
+			"phone@2": "",
+			"tablet": "",
+			"tablet@2": ""
+		},
+		"deviceTypes": {
+			"desktop": true,
+			"tablet": true,
+			"phone": true
+		},
+		"supportedThemes": [
+			"sap_hcb",
+			"sap_belize"
+
+		]
+	},
+
+	"sap.ui5": {
+		"rootView": {
+			"viewName": "IOT.HierarchyModule.view.main",
+			"type": "XML"
+		},
+		"dependencies": {
+			"minUI5Version": "1.30.0",
+			"libs": {
+				"sap.ui.layout": {},
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {}
+			}
+		},
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		},
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "IOT.HierarchyModule.i18n.i18n"
+				}
+			},
+			"": {
+				"type": "sap.ui.model.json.JSONModel",
+				"settings": {
+					"bAsync": false
+				},
+				"uri": "model/data.json"
+			}
+		},
+		"resources": {
+			"css": [{
+				"uri": "css/style.css"
+			}],
+			"js":[
+				{"uri": "control/Node.js"},
+				{"uri": "control/Link.js"},
+				{"uri": "control/Tree.js"}
+			]
+		},
+		"routing": {
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"async": true,
+				"viewPath": "IOT.HierarchyModule.view",
+				"controlAggregation": "pages",
+				"controlId": "idAppControl",
+				"clearControlAggregation": false
+			},
+			"routes": [{
+				"name": "Routemain",
+				"pattern": "Routemain",
+				"target": ["Targetmain"]
+			}],
+			"targets": {
+				"Targetmain": {
+					"viewType": "XML",
+					"transition": "slide",
+					"clearControlAggregation": false,
+					"viewName": "main"
+				}
+			}
+		}
+	}
+}

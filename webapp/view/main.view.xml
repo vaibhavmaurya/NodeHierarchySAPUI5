@@ -1,0 +1,54 @@
+<mvc:View controllerName="IOT.HierarchyModule.controller.main" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:mvc="sap.ui.core.mvc"
+	displayBlock="true" xmlns="sap.m" xmlns:f="sap.f" xmlns:iot="iot.ma.iot" xmlns:form="sap.ui.layout.form" xmlns:core="sap.ui.core"
+	xmlns:layout="sap.ui.layout">
+	<App id="idAppControl">
+		<pages>
+			<f:DynamicPage id="dynamicPageId">
+				<!-- DynamicPage Title -->
+				<f:title>
+					<f:DynamicPageTitle>
+						<f:heading>
+							<Title text="Type Subtype Hierarchy"/>
+						</f:heading>
+						<f:actions>
+							<ToolbarSpacer/>
+							<!--<Button text="Global Action" type="Transparent"/>-->
+							<!--<Button text="Toggle Footer" type="Transparent" press="onToggleFooter"/>-->
+							<!--<Button icon="sap-icon://action" type="Transparent"/>-->
+						</f:actions>
+					</f:DynamicPageTitle>
+				</f:title>
+				<!-- DynamicPage Header -->
+				<f:header>
+					<f:DynamicPageHeader pinnable="true">
+						<FlexBox alignItems="Center" justifyContent="Center">
+							<items>
+								<form:SimpleForm id="SimpleFormChange354" editable="true" layout="ResponsiveGridLayout">
+									<form:content>
+										<Label text="Type"/>
+										<Input id="typeInput" type="Text" placeholder="Enter Type" showSuggestion="true" showValueHelp="true"
+											valueHelpRequest="handleValueHelp" suggestionItems="{/Types}" change="onTypeChange">
+											<suggestionItems>
+												<core:Item text="{name}"/>
+											</suggestionItems>
+										</Input>
+									</form:content>
+								</form:SimpleForm>
+							</items>
+						</FlexBox>
+					</f:DynamicPageHeader>
+				</f:header>
+				<!-- DynamicPage Content -->
+				<f:content></f:content>
+				<!-- DynamicPage Footer -->
+				<f:footer>
+					<OverflowToolbar>
+						<ToolbarSpacer/>
+						<Button type="Accept" text="Accept"/>
+						<Button type="Reject" text="Reject"/>
+					</OverflowToolbar>
+				</f:footer>
+			</f:DynamicPage>
+		</pages>
+	</App>
+</mvc:View>

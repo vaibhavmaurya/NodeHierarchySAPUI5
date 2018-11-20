@@ -1,0 +1,43 @@
+/* Enter your custom styles here */
+  .iot-treeContainer {
+  }
+  
+  .iot-node {
+    cursor: pointer;
+    display:block;
+  }
+
+  .overlay{
+      background-color:#EEE;
+  }
+   
+  .iot-node circle {
+    /*fill: #fff;*/
+    stroke: steelblue;
+    stroke-width: 2px;
+  }
+   
+  .iot-node text {
+    font-size:15px; 
+    /*font-family:sans-serif;*/
+  }
+   
+  .iot-link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 2px;
+  }
+
+  .templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+  }
+
+  .ghostCircle.show{
+      display:block;
+  }
+
+  .ghostCircle, .activeDrag .ghostCircle{
+       display: none;
+  }
