@@ -26,11 +26,12 @@
 		}
 	},
 
-	"Types": [{
-		"key": "company",
-		"name": "Company"
-	}, {
+	"Types": [ {
 		"key": "org",
-		"name": "Organization"
+		"name": "Organization",
+		"subtypes": [{
+			"key": "company",
+			"name": "Company"
+		}]
 	}]
 }

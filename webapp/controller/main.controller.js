@@ -2,8 +2,15 @@ sap.ui.define([
 	"sap/ui/core/mvc/Controller",
 	"iot/ma/iot/tree",
 	'sap/ui/core/Fragment',
-	'sap/ui/model/Filter'
-], function (Controller, Tree, Fragment, Filter) {
+	'sap/ui/model/Filter',
+	'sap/ui/layout/HorizontalLayout',
+	'sap/ui/layout/VerticalLayout',
+	'sap/m/Button',
+	'sap/m/Dialog',
+	'sap/m/Label',
+	'sap/m/MessageToast',
+	'sap/m/Input'
+], function (Controller, Tree, Fragment, Filter, HorizontalLayout, VerticalLayout, Button, Dialog, Label, MessageToast, Input) {
 	"use strict";
 
 	return Controller.extend("IOT.HierarchyModule.controller.main", {
@@ -13,17 +20,11 @@ sap.ui.define([
 
 		onAfterRendering: function () {
 			"use strict";
-			var sDynamicId = this.getView().byId("dynamicPageId").getId();
-			var oDynamicSpacer = $("#" + sDynamicId + "-spacer");
-			var oDynamicContent = $("#" + sDynamicId + "-contentFitContainer");
 			var self = this;
 			var fnCallback = function (oEvent) {
 				this._oTree = new Tree({
-					contentWidth: oDynamicSpacer.width() + "px",
-					contentHeight: (oDynamicContent.height() - 10) + "px",
-					openNodeMenu: self.handleOpenNodeActionMenu.bind(self)
-					// height: "100%"
-
+					pressNode: self.handleOpenNodeActionMenu.bind(self),
+					expandOnClick:false
 				});
 				this.getView().byId("dynamicPageId").setContent(this._oTree);
 			};
@@ -63,25 +64,24 @@ sap.ui.define([
 			evt.getSource().getBinding("items").filter([oFilter]);
 		},
 
-		_handleValueHelpClose: function (evt) {
+		onSubTypeChange: function (evt) {
 			var oSelectedItem = evt.getParameter("selectedItem");
 			var oData = JSON.parse(this.getView().getModel().getJSON());
-			if (oSelectedItem) {
-				var productInput = this.byId(this.inputId);
-				productInput.setValue(oSelectedItem.getTitle());
-			}
-			evt.getSource().getBinding("items").filter([]);
-
-			this._oTree.setData(oData["SubTypeTree"][oSelectedItem.getDescription()]);
+			this._oTree.setData(oData["SubTypeTree"][oSelectedItem.getKey()]);
 		},
 
 		onTypeChange: function (oEvent) {
 			"use strict";
+			var oTypeContext = oEvent.getParameter("selectedItem").getBindingContext();
+			var aSubTypes = oTypeContext.getProperty(oTypeContext.getPath())["subtypes"];
+			this.getView().getModel().setProperty("/subtypes",aSubTypes);
+			
 		},
-		
+
 		handleOpenNodeActionMenu: function (oEvent) {
 			// create action sheet only once
 			var oNode = oEvent.getParameter("node");
+			this._SelectedNode = oEvent.getParameter("nodeData");
 			if (!this._actionSheet) {
 				this._actionSheet = sap.ui.xmlfragment(
 					"IOT.HierarchyModule.fragment.ActionSheet",
@@ -92,5 +92,51 @@ sap.ui.define([
 
 			this._actionSheet.openBy(oNode);
 		},
+
+		onActionCreate: function () {
+			this.onConfirmDialog();
+		},
+		
+		onActionToggle : function(){
+			this._oTree.toggleNode();
+		},
+
+		onActionDelete : function(){
+			this._oTree.deleteNode();
+		},
+		
+		onConfirmDialog: function () {
+			var self = this;
+			var dialog = new Dialog({
+				title: 'Create Node',
+				type: 'Message',
+				content: [
+					new Input('confirmDialogTextarea', {
+						placeholder: 'Enter Node'
+					})
+				],
+				beginButton: new Button({
+					text: 'Submit',
+					press: function () {
+						var sText = sap.ui.getCore().byId('confirmDialogTextarea').getValue();
+						if (sText) {
+							self._oTree.addNode(sText);
+						}
+						dialog.close();
+					}
+				}),
+				endButton: new Button({
+					text: 'Cancel',
+					press: function () {
+						dialog.close();
+					}
+				}),
+				afterClose: function () {
+					dialog.destroy();
+				}
+			});
+
+			dialog.open();
+		}
 	});
 });

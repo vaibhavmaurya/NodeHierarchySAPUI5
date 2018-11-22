@@ -12,9 +12,6 @@
 						</f:heading>
 						<f:actions>
 							<ToolbarSpacer/>
-							<!--<Button text="Global Action" type="Transparent"/>-->
-							<!--<Button text="Toggle Footer" type="Transparent" press="onToggleFooter"/>-->
-							<!--<Button icon="sap-icon://action" type="Transparent"/>-->
 						</f:actions>
 					</f:DynamicPageTitle>
 				</f:title>
@@ -23,17 +20,42 @@
 					<f:DynamicPageHeader pinnable="true">
 						<FlexBox alignItems="Center" justifyContent="Center">
 							<items>
-								<form:SimpleForm id="SimpleFormChange354" editable="true" layout="ResponsiveGridLayout">
-									<form:content>
-										<Label text="Type"/>
-										<Input id="typeInput" type="Text" placeholder="Enter Type" showSuggestion="true" showValueHelp="true"
-											valueHelpRequest="handleValueHelp" suggestionItems="{/Types}" change="onTypeChange">
-											<suggestionItems>
-												<core:Item text="{name}"/>
-											</suggestionItems>
-										</Input>
-									</form:content>
-								</form:SimpleForm>
+								<FlexBox width="100%" alignItems="Center" justifyContent="Center">
+									<items>
+										<FlexBox direction="Column" class="sapUiTinyMargin">
+											<items>
+												<FlexBox alignItems="End" justifyContent="SpaceBetween">
+													<items>
+														<Title text="Type"/>
+														<HBox>
+															<Button icon="sap-icon://add" type="Transparent"/>
+															<Button icon="sap-icon://delete" type="Transparent"/>
+														</HBox>
+													</items>
+												</FlexBox>
+												<ComboBox showSecondaryValues="true" items="{ path: '/Types', sorter: { path: 'name' } }" selectionChange="onTypeChange">
+													<core:ListItem key="{key}" text="{name}" additionalText="{key}"/>
+												</ComboBox>
+											</items>
+										</FlexBox>
+										<FlexBox direction="Column" class="sapUiTinyMargin">
+											<items>
+												<FlexBox alignItems="End" justifyContent="SpaceBetween">
+													<items>
+														<Title text="Sub Type"/>
+														<HBox>
+															<Button icon="sap-icon://add" type="Transparent"/>
+															<Button icon="sap-icon://delete" type="Transparent"/>
+														</HBox>
+													</items>
+												</FlexBox>
+												<ComboBox id="idSubType" showSecondaryValues="true" items="{ path: '/subtypes', sorter: { path: 'name' } }" selectionChange="onSubTypeChange">
+													<core:ListItem key="{key}" text="{name}" additionalText="{key}"/>
+												</ComboBox>
+											</items>
+										</FlexBox>
+									</items>
+								</FlexBox>
 							</items>
 						</FlexBox>
 					</f:DynamicPageHeader>

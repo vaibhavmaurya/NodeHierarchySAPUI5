@@ -8,7 +8,10 @@ sap.ui.define([
 	return UIComponent.extend("IOT.HierarchyModule.Component", {
 
 		metadata: {
-			manifest: "json"
+			manifest: "json",
+			config: {
+				fullWidth: true
+			}
 		},
 
 		/**

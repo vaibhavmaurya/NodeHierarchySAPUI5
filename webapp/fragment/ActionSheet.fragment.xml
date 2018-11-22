@@ -5,6 +5,7 @@
 		title="Choose Your Action"
 		showCancelButton="true"
 		placement="Bottom">
+			<Button text="Toggle" icon="sap-icon://drill-down" press="onActionToggle" />
 			<Button text="Create" icon="sap-icon://create" press="onActionCreate" />
 			<Button text="Delete" icon="sap-icon://delete" press="onActionDelete" />
 			<Button text="Edit" icon="sap-icon://edit" press="onActionEdit" />

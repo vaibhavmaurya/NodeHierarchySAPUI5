@@ -19,14 +19,19 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				"nodeColorWithoutChildren": {
 					type: "string",
 					defaultValue: "#fff"
+				},
+				"expandOnClick": {
+					type: "boolean",
+					defaultValue: true
 				}
 				// including data binding and type validation
 			},
-			events:{
-			"openNodeMenu":{}
-		}
+			events: {
+				"pressNode": {}
+			}
 		},
 		init: function () {
+			this._selectedNode = null;
 			this._oControlSettings = {
 				"attributes": {
 					"circle": {
@@ -68,24 +73,27 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 		setData: function (oData) {
 			"use strict";
 			var oTreeContainer = $(".iot-treeContainer");
+			var self = this;
 			this._oTreeData = oData;
 			this._oBaseSvg = null;
 			this.oMargin = {
-				top: 20,
+				top: 0,
 				right: 50,
 				bottom: 20,
 				left: 100
 			};
 			this._oBaseSvg = d3Object.select(".iot-treeContainer").append("svg")
-				.attr("viewBox", "0 0 " + oTreeContainer.width() + " " + 1000)
+				.attr("viewBox", "0 0 " + oTreeContainer.width() + " " + 700)
 				.attr("preserveAspectRatio", "xMidYMid meet");
-			// .attr("width", viewerWidth)
-			// .attr("height", viewerHeight)
-			// .attr("class", "overlay")
-			// .call(zoomListener);
 
 			this._oSvgGroup = this._oBaseSvg.append("g")
 				.attr("transform", "translate(" + this.oMargin.left + "," + this.oMargin.top + ")");
+
+			var zoomListener = d3Object.behavior.zoom().scaleExtent([0.1, 3]).on("zoom", function () {
+				self._oSvgGroup.attr("transform", "translate(" + d3Object.event.translate + ")scale(" + d3Object.event.scale + ")");
+			});
+			
+			this._oBaseSvg.call(zoomListener);
 
 			var oSVGElement = $("svg");
 			this._oTree = d3Object.layout.tree()
@@ -95,6 +103,51 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 			this._oTreeData.y0 = 0;
 			this.update(this._oTreeData);
 			// d3Object.json("/webapp/model/data.json", fnCallback.bind(this));			
+		},
+
+		addNode: function (sName) {
+			if (this._selectedNode) {
+				if (this._selectedNode._children) {
+					this._selectedNode.children = this._selectedNode._children;
+					this._selectedNode._children = null;
+				}
+				if (!this._selectedNode.children) {
+					this._selectedNode.children = [];
+				}
+
+				var oNew_node = {
+					'name': sName,
+					'id': this.generateUUID(),
+					'depth': this._selectedNode.depth + 1,
+					'children': [],
+					'_children': null
+				};
+				this._selectedNode.children.push(oNew_node);
+				this.update(this._selectedNode);
+			}
+		},
+
+		toggleNode: function () {
+			this._fnToggleNode(this._selectedNode);
+		},
+
+		deleteNode: function () {
+			var oParent = this._selectedNode.parent;
+			var oNode = this._selectedNode;
+			oParent.children = oParent.children.filter(function (d) {
+				return d.id !== oNode.id;
+			});
+			this.update(oParent);
+		},
+
+		generateUUID: function () {
+			var d = new Date().getTime();
+			var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+				var r = (d + Math.random() * 16) % 16 | 0;
+				d = Math.floor(d / 16);
+				return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+			});
+			return uuid;
 		},
 
 		renderer: function (oRm, oControl) { // the part creating the HTML
@@ -127,7 +180,7 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 
 		},
 
-		fnClick: function (d) {
+		_fnToggleNode: function (d) {
 			if (d.children) {
 				d._children = d.children;
 				d.children = null;
@@ -136,6 +189,28 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				d._children = null;
 			}
 			this.update(d);
+		},
+
+		_fnContextMenu: function (oNode, oNodeData) {
+			d3Object.event.preventDefault();
+			this.firePressNode({
+				node: oNode.node(),
+				nodeData: oNodeData
+			});
+		},
+
+		_fnCallEvent: function (oElement, oNodeData, bContextMenu) {
+			var bExpandOnClick = this.getExpandOnClick();
+			this._selectedNode = oNodeData;
+			if (bExpandOnClick) {
+				if (bContextMenu) {
+					this._fnContextMenu(oElement, oNodeData);
+				} else {
+					this._fnToggleNode(oNodeData);
+				}
+			} else {
+				this._fnContextMenu(oElement, oNodeData);
+			}
 		},
 
 		_registerNodeEnter: function (oNode, oSource) {
@@ -151,7 +226,12 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				.attr("transform", function (d) {
 					return "translate(" + oSource.y0 + "," + oSource.x0 + ")";
 				})
-				.on('click', self.fnClick.bind(self));
+				.on('click', function (o) {
+					self._fnCallEvent(d3Object.select(this).select('circle'), o, false);
+				})
+				.on('contextmenu', function (o) {
+					self._fnCallEvent(d3Object.select(this).select('circle'), o, true);
+				});
 
 			var fnEventBasedNodeAttrAndStyling = function (oMe, aList, method) {
 				aList.forEach(function (o) {
@@ -165,19 +245,15 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				.style("fill", function (d) {
 					return d._children ? sNodeColorWithChildren : sNodeColorWithoutChildren;
 				})
-				.on('contextmenu', function (o) {
-					d3Object.event.preventDefault();
-					self.fireOpenNodeMenu({node:this,nodeData:o});
-				})
 				.on('mouseover', function (d) {
 					var oMe = d3Object.select(this);
-					fnEventBasedNodeAttrAndStyling(oMe,oEventAttributes.mouseover,"attr");
-					fnEventBasedNodeAttrAndStyling(oMe,oEventStyles.mouseover,"style");
+					fnEventBasedNodeAttrAndStyling(oMe, oEventAttributes.mouseover, "attr");
+					fnEventBasedNodeAttrAndStyling(oMe, oEventStyles.mouseover, "style");
 				})
 				.on('mouseout', function (d) {
 					var oMe = d3Object.select(this);
-					fnEventBasedNodeAttrAndStyling(oMe,oEventAttributes.mouseout,"attr");
-					fnEventBasedNodeAttrAndStyling(oMe,oEventStyles.mouseout,"style");
+					fnEventBasedNodeAttrAndStyling(oMe, oEventAttributes.mouseout, "attr");
+					fnEventBasedNodeAttrAndStyling(oMe, oEventStyles.mouseout, "style");
 				});
 
 			oNodeEnter.append("text")
@@ -216,6 +292,15 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				.attr("r", iCircleRadius)
 				.style("fill", function (d) {
 					return d._children ? sNodeColorWithChildren : sNodeColorWithoutChildren;
+				});
+			oNodeUpdate.select("text")
+				.attr("x", function (d) {
+					return d.children || d._children ? -10 : 10;
+				})
+				.attr("dy", ".35em")
+				// .attr('class', 'nodeText')
+				.attr("text-anchor", function (d) {
+					return d.children || d._children ? "end" : "start";
 				});
 		},
 
@@ -275,12 +360,10 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				})
 				.remove();
 		},
-		
-		_openPopupMenu : function(){
-			
+
+		_openPopupMenu: function () {
+
 		},
-		
-		
 
 		update: function (source) {
 			// Compute the new height, function counts total children of this._oTreeData node and sets tree height accordingly.
@@ -302,7 +385,7 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				}
 			};
 			childCount(0, this._oTreeData);
-			var newHeight = d3Object.max(levelWidth) * 20; // 20 pixels per line  
+			var newHeight = d3Object.max(levelWidth) * 10; // 20 pixels per line  
 			// tree = tree.size([newHeight, viewerWidth]);
 			this._oTree.size([newHeight > viewerHeight ? newHeight : viewerHeight, viewerWidth]);
 			// Compute the new tree layout.
@@ -315,7 +398,7 @@ sap.ui.define("iot/ma/iot/tree", ["sap/ui/thirdparty/d3"], function (d3Object) {
 				// d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
 				// alternatively to keep a fixed scale one can set a fixed depth per level
 				// Normalize for fixed-depth by commenting out below line
-				d.y = (d.depth * 200); //500px per level.
+				d.y = (d.depth * 250); //500px per level.
 			});
 
 			// Update the nodes…
