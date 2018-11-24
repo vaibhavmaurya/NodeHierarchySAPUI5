@@ -10,6 +10,18 @@ sap.ui.define([
 			var oModel = new JSONModel(Device);
 			oModel.setDefaultBindingMode("OneWay");
 			return oModel;
+		},
+		
+		getApplicationModel : function(){
+			var oApplicationData = {
+				"subtype":{
+					"enabled" : false,
+					"update":{
+						"enabled" : false
+					}
+				}
+			};
+			return (function(){ var oModel = new JSONModel(); oModel.setData(oApplicationData); return oModel;})();
 		}
 
 	};

@@ -9,8 +9,9 @@ sap.ui.define([
 	'sap/m/Dialog',
 	'sap/m/Label',
 	'sap/m/MessageToast',
-	'sap/m/Input'
-], function (Controller, Tree, Fragment, Filter, HorizontalLayout, VerticalLayout, Button, Dialog, Label, MessageToast, Input) {
+	'sap/m/Input',
+	'IOT/HierarchyModule/model/models'
+], function (Controller, Tree, Fragment, Filter, HorizontalLayout, VerticalLayout, Button, Dialog, Label, MessageToast, Input, models) {
 	"use strict";
 
 	return Controller.extend("IOT.HierarchyModule.controller.main", {
@@ -28,8 +29,10 @@ sap.ui.define([
 				});
 				this.getView().byId("dynamicPageId").setContent(this._oTree);
 			};
+			this._oAppModel = models.getApplicationModel();
 			fnCallback = fnCallback.bind(this);
 			this.getView().getModel().attachRequestCompleted(fnCallback);
+			this.getView().setModel(this._oAppModel,"AppModel");
 		},
 
 		handleValueHelp: function (oEvent) {
@@ -68,6 +71,7 @@ sap.ui.define([
 			var oSelectedItem = evt.getParameter("selectedItem");
 			var oData = JSON.parse(this.getView().getModel().getJSON());
 			this._oTree.setData(oData["SubTypeTree"][oSelectedItem.getKey()]);
+			this._oAppModel.setProperty("/subtype/update/enabled",true);
 		},
 
 		onTypeChange: function (oEvent) {
@@ -75,6 +79,7 @@ sap.ui.define([
 			var oTypeContext = oEvent.getParameter("selectedItem").getBindingContext();
 			var aSubTypes = oTypeContext.getProperty(oTypeContext.getPath())["subtypes"];
 			this.getView().getModel().setProperty("/subtypes",aSubTypes);
+			this._oAppModel.setProperty("/subtype/enabled",true);
 			
 		},
 
